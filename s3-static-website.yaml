@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'AWS CloudFormation Template S3-Static-Website:
+  This template creates a bucket with configurations set up for static website hosting.
+  Access is granted only with existing cloudfront distribution.'
+Parameters:
+  DistributionArnIdentity:
+    Type: String
+    Description: The DNS name of an existing Amazon Route 53 hosted zone
+    AllowedPattern: (?!-)[a-zA-Z0-9-.]{1,63}(?<!-)
+    ConstraintDescription: must be a valid DNS zone name.
+Resources:
+  S3BucketForContent:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: BucketOwnerRead
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: error.html
+    DeletionPolicy: Retain
+  BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      PolicyDocument:
+        Id: MyS3WebsitePolicy
+        Version: 2012-10-17
+        Statement:
+          - Sid: PublicReadForGetBucketObjects
+            Effect: Allow
+            Principal:
+              "AWS": "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity E95426RT792QE"
+            Action: 's3:GetObject'
+            Resource: !Join
+              - ''
+              - - 'arn:aws:s3:::'
+                - !Ref S3BucketForContent
+                - /*
+      Bucket: !Ref S3BucketForContent
+Outputs:
+  WebsiteURL:
+    Value: !GetAtt
+      - S3BucketForContent
+      - WebsiteURL
+    Description: URL for website hosted on S3
+  S3BucketSecureURL:
+    Value: !Join
+      - ''
+      - - 'https://'
+        - !GetAtt
+          - S3BucketForContent
+          - DomainName
+    Description: Name of S3 bucket to hold website content
