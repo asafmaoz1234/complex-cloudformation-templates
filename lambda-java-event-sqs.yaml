@@ -1,0 +1,62 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: AWS Lambda with Java 17, triggered by EventBridge or SQS.
+
+Resources:
+  MyLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: MyJavaLambdaFunction # Replace with your lambda name
+      Runtime: java17
+      Handler: com.example.MyHandler::handleRequest # Replace with your handler path
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        S3Bucket: my-lambda-functions-bucket # Replace with your S3 bucket name
+        S3Key: my-java-lambda-function.jar   # Replace with your jar file in S3
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Policies:
+        - PolicyName: LambdaExecutionPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'logs:*'
+                Resource: 'arn:aws:logs:*:*:*'
+              - Effect: Allow
+                Action:
+                  - 'sqs:ReceiveMessage'
+                  - 'sqs:DeleteMessage'
+                  - 'sqs:GetQueueAttributes'
+                Resource: '*' # Specify your SQS Queue ARN here
+              - Effect: Allow
+                Action:
+                  - 'events:*'
+                Resource: '*' # Specify your EventBridge ARN here
+
+  LambdaEventSourceMappingSQS:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      EventSourceArn: arn:aws:sqs:region:account-id:queue-name # Replace with your SQS Queue ARN
+      FunctionName: !Ref MyLambdaFunction
+      Enabled: true
+
+  LambdaPermissionForEventBridge:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref MyLambdaFunction
+      Action: 'lambda:InvokeFunction'
+      Principal: 'events.amazonaws.com'
+      SourceArn: arn:aws:events:region:account-id:event-bus/default # Replace with your EventBridge ARN
