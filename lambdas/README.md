@@ -1,15 +1,42 @@
-# cloudformation-templates
-
-<h2>AWS Lambda with EventBridge and SQS Integration</h2>
-
+# AWS Lambda with Java 17
 **java17-eventbridge-sqs.yaml**
 
-<p>This CloudFormation template establishes a comprehensive AWS environment for a Java 17 Lambda function, with the added capability of being triggered by either a scheduled Amazon EventBridge event or messages from an AWS SQS queue. It provides an automated, event-driven setup that is ideal for various serverless application scenarios.</p>
+## Overview
 
-<h3>Key Components of the Template:</h3>
-<ul>
-  <li><strong>AWS Lambda Function</strong>: Runs Java 17 code, set to be triggered by EventBridge or SQS.</li>
-  <li><strong>Amazon EventBridge Rule</strong>: Configured to trigger the Lambda function daily at 20:00 UTC.</li>
-  <li><strong>AWS SQS Queue</strong>: A message queue that can also trigger the Lambda function.</li>
-  <li><strong>Amazon S3 Bucket</strong>: Created to store the Java Lambda function's JAR file.</li>
-</ul>
+This CloudFormation template deploys an AWS Lambda function written in Java 17 and uses a jar file from S3. 
+The Lambda function can be triggered by either an EventBridge event or an SQS message.<br> 
+This README provides instructions on deploying and using the template.
+
+## Template Details
+
+### Resources Created
+
+- **Lambda Function**:
+    - Function Name: MyJavaLambdaFunction (Replace with your preferred Lambda function name)
+    - Runtime: Java 17
+    - Handler: com.example.MyHandler::handleRequest (Replace with your Lambda function handler)
+    - Execution Role: IAM role with necessary permissions.
+    - Code Source: JAR file stored in an S3 bucket.
+
+- **IAM Role**:
+    - Assume Role Policy: Allows Lambda service to assume the role.
+    - Execution Policy: Grants permissions for Lambda function to interact with logs, SQS, and EventBridge (adjust resource ARNs as needed).
+
+- **Lambda Event Source Mapping (SQS)**:
+    - Binds the Lambda function to an SQS queue for message triggering.
+
+- **Lambda Permission for EventBridge**:
+    - Grants EventBridge the permission to invoke the Lambda function.
+
+## Deployment
+
+Follow these steps to deploy the CloudFormation stack:
+
+1. Clone this repository to your local machine.
+
+2. Navigate to the directory containing this CloudFormation template.
+
+3. Deploy the stack using AWS CLI:
+   ```shell
+   aws cloudformation create-stack --stack-name MyJavaLambdaStack --template-body file://my-java-lambda-template.yaml --capabilities CAPABILITY_IAM
+    ```
