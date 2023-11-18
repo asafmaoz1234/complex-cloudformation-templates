@@ -7,6 +7,14 @@ This CloudFormation template deploys an AWS Lambda function written in Java 17 a
 The Lambda function can be triggered by either an EventBridge event or an SQS message.<br> 
 This README provides instructions on deploying and using the template.
 
+## Prerequisites
+
+Before deploying this template, ensure you have the following prerequisites:
+- An AWS account with the necessary permissions to create Lambda functions, IAM roles, and event resources.
+- An S3 bucket with the code base jar uploaded.
+- SQS queue set up.
+- EventBridge (formally cloudwatch) scheduled event.
+
 ## Template Details
 
 ### Resources Created
