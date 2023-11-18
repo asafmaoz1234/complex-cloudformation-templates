@@ -2,6 +2,8 @@
 
 <h2>AWS Lambda with EventBridge and SQS Integration</h2>
 
+**java17-eventbridge-sqs.yaml**
+
 <p>This CloudFormation template establishes a comprehensive AWS environment for a Java 17 Lambda function, with the added capability of being triggered by either a scheduled Amazon EventBridge event or messages from an AWS SQS queue. It provides an automated, event-driven setup that is ideal for various serverless application scenarios.</p>
 
 <h3>Key Components of the Template:</h3>
