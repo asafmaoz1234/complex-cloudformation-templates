@@ -1,0 +1,157 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: apigw-lambda-domain-iam API Gateway, Lambda function, custom domain, and base path mapping.
+
+Parameters:
+  ApiGatewayName: # API Gateway Name
+    Type: String
+    Default: ChatApi
+  ApiGatewayHTTPMethod: # API Gateway HTTP Method to invoke the Lambda function
+    Type: String
+    Default: POST
+  lambdaFunctionName: # Lambda Function Name
+    Type: String
+    AllowedPattern: '[a-zA-Z0-9]+[a-zA-Z0-9-]+[a-zA-Z0-9]+'
+    Default: ServerlesGpt
+  CodeS3Bucket: # S3 Bucket Name ** should be set up before deploying the stack **
+    Type: String
+    Default: serverlssgptbucket
+  S3CodeFileName: # S3 Code File Name ** should be set up before deploying the stack **
+    Type: String
+    Default: serverlssGptBucket.zip
+  PathPart: # API Gateway Resource Path Part
+    Type: String
+    Default: chat
+  DomainName: # Custom Domain Name
+    Type: String
+    Default: ai.asafmaoz.com
+  CertificateArn: # SSL Certificate ARN us-east ** should be set up before deploying the stack **
+    Type: String
+    Default: arn:aws:acm:us-east-1:353009194243:certificate/0fab76b7-1df6-4a98-984c-4b743732f683
+  LambdaHandler: # Lambda Handler
+    Type: String
+    Default: com.asafmaoz.ServerlessGpt
+  LambdaRunTime: # Lambda Runtime
+    Type: String
+    Default: java11
+
+
+Resources:
+  ApiGatewayRestApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Description: API Gateway RestApi
+      Name: !Ref ApiGatewayName
+
+  ApiGatewayMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: !Ref ApiGatewayHTTPMethod
+      ResourceId: !Ref ApiGatewayResource
+      RestApiId: !Ref ApiGatewayRestApi
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunction.Arn}/invocations
+      MethodResponses:
+        - StatusCode: 200
+
+  ApiGatewayResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt ApiGatewayRestApi.RootResourceId
+      PathPart: !Ref PathPart
+      RestApiId: !Ref ApiGatewayRestApi
+
+  ApiGatewayDeployment:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+    DependsOn:
+      - ApiGatewayMethod
+
+  ApiGatewayDomainName:
+    Type: AWS::ApiGateway::DomainName
+    Properties:
+      CertificateArn: !Ref CertificateArn
+      DomainName: !Ref DomainName
+
+  ApiGatewayStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      DeploymentId: !Ref ApiGatewayDeployment
+      StageName: Prod
+
+  ApiGatewayBasePathMapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    Properties:
+      DomainName: !Ref ApiGatewayDomainName
+      RestApiId: !Ref ApiGatewayRestApi
+      Stage: Prod
+    DependsOn:
+      - ApiGatewayStage
+
+  LambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: !Ref LambdaHandler
+      Role: !GetAtt lambdaIAMRole.Arn
+      FunctionName: !Ref lambdaFunctionName
+      Code:
+        S3Bucket: !Ref CodeS3Bucket
+        S3Key: !Ref S3CodeFileName
+      Runtime: !Ref LambdaRunTime
+
+  LambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt LambdaFunction.Arn  # Reference the function's ARN
+      Action: "lambda:InvokeFunction"
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/*/${ApiGatewayHTTPMethod}/${PathPart}
+      # Note: SourceArn here means any method on any resource within the API Gateway can invoke this Lambda.
+
+  lambdaIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+      Policies:
+        - PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Effect: Allow
+                Resource:
+                  - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${lambdaFunctionName}:*
+          PolicyName: lambda
+
+  lambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${lambdaFunctionName}
+      RetentionInDays: 90
+
+Outputs:
+  ApiGatewayRestApi:
+    Description: API Gateway RestApi
+    Value: !Ref ApiGatewayRestApi
+
+  ApiGatewayInvokeURL:
+    Description: API Gateway Invoke URL
+    Value: !Sub https://${ApiGatewayDomainName}/Prod/chat
+
+  lambdaArn:
+    Value: !GetAtt LambdaFunction.Arn
+
