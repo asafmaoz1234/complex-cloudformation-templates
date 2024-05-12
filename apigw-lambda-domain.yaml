@@ -26,7 +26,7 @@ Parameters:
     Default: ai.asafmaoz.com
   CertificateArn: # SSL Certificate ARN us-east ** should be set up before deploying the stack **
     Type: String
-    Default: arn:aws:acm:us-east-1:353009194243:certificate/0fab76b7-1df6-4a98-984c-4b743732f683
+    Default: arn:aws:acm:eu-west-1:353009194243:certificate/27c64e0d-9152-43b1-9480-22d99f57605b
   LambdaHandler: # Lambda Handler
     Type: String
     Default: com.asafmaoz.ServerlessGpt
@@ -73,8 +73,11 @@ Resources:
   ApiGatewayDomainName:
     Type: AWS::ApiGateway::DomainName
     Properties:
-      CertificateArn: !Ref CertificateArn
+      RegionalCertificateArn: !Ref CertificateArn
       DomainName: !Ref DomainName
+      EndpointConfiguration: # Endpoint Type for the API Gateway custom domain name
+        Types:
+          - REGIONAL
 
   ApiGatewayStage:
     Type: AWS::ApiGateway::Stage
