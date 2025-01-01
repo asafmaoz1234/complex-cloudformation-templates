@@ -1,49 +1,65 @@
-# AWS CloudFormation Templates Repository
+## CloudFormation Complex Templates Repository
 
-## Description
-This repository contains a collection of AWS CloudFormation templates for various AWS services and use cases.
+<p>Welcome, a collection of high-quality, real-world use case templates designed to streamline your AWS infrastructure setup.</p>
 
-## Table of Contents
-1. [Getting Started](#getting-started)
-2. [Directory Structure](#directory-structure)
-5. [Customization](#customization)
-7. [License](#license)
-8. [Contact Information](#contact-information)
-10. [Additional Resources](#additional-resources)
+<h2>About</h2>
+<p>This repository provides a range of complex CloudFormation templates, each targeting a specific use case. Whether you're deploying a static website, setting up a serverless backend for a proof of concept (POC), or tackling other infrastructure needs, you'll find ready-to-use solutions here. Each template is thoroughly documented and organized for ease of use.</p>
 
-## Getting Started
-To deploy the CloudFormation templates, follow these steps:
+<h2>Repository Structure</h2>
+<ul>
+    <li>Each template resides in its own folder.</li>
+    <li>Every folder includes a <code>README.md</code> file that explains:
+        <ul>
+            <li><strong>Usage</strong>: How to deploy the template.</li>
+            <li><strong>Affected Resources</strong>: AWS resources that will be created, modified, or deleted.</li>
+            <li><strong>Required Modifications</strong>: Any customizations needed before deployment.</li>
+        </ul>
+    </li>
+</ul>
 
-**Using the AWS CLI:**
-1. Prerequisite: You must have an AWS account and AWS CLI installed.
-2. Clone this repository to your local machine.
-3. Navigate to the template directory you wish to deploy.
-4. Run the `aws cloudformation create-stack` command with the appropriate parameters.
-5. Repeat steps 3-4 for any additional templates you wish to deploy.
+<h2>Getting Started</h2>
+<ol>
+    <li>Clone the repository:
+        <pre><code>git clone https://github.com/your-repository-name.git</code></pre>
+    </li>
+    <li>Navigate to the template folder that matches your use case:
+        <pre><code>cd templates/static-website</code></pre>
+    </li>
+    <li>Review the <code>README.md</code> file in the folder for deployment instructions and prerequisites.</li>
+    <li>Deploy the CloudFormation template using the AWS CLI or AWS Management Console.</li>
+</ol>
 
-**Using the AWS Console:**
-1. Prerequisite: You must have an AWS account.
-2. Clone this repository to your local machine.
-3. Navigate to the template directory you wish to deploy.
-4. Sign in to the AWS Console.
-5. Navigate to the CloudFormation service.
-6. Click the "Create Stack" button.
-7. Select "Upload a template file" and upload the template file.
-8. Click "Next" and follow the prompts to deploy the stack.
-9. Repeat steps 5-8 for any additional templates you wish to deploy.
+<h2>How to Contribute</h2>
+<p>We welcome contributions from the developer community! If you have a CloudFormation template for a specific use case, please follow these steps to contribute:</p>
+<ol>
+    <li><strong>Fork the repository</strong> and clone your fork locally.</li>
+    <li><strong>Create a new folder</strong> for your template under the <code>templates</code> directory. Use a descriptive name for the folder (e.g., <code>serverless-backend-poc</code>).</li>
+    <li>Add your CloudFormation template file (e.g., <code>template.yaml</code>) and a <code>README.md</code> file.
+        <ul>
+            <li>The <code>README.md</code> file should include:
+                <ul>
+                    <li><strong>Overview</strong>: A brief description of the use case.</li>
+                    <li><strong>Usage</strong>: Deployment instructions.</li>
+                    <li><strong>Resources</strong>: List of AWS resources affected by the template.</li>
+                    <li><strong>Modifications</strong>: Any required changes to the template before deployment.</li>
+                </ul>
+            </li>
+        </ul>
+    </li>
+    <li>Open a pull request with a descriptive title and summary of your contribution.</li>
+</ol>
 
-## Directory Structure
-- Contains CloudFormation templates organized by the main service used.
+<h2>Contribution Guidelines</h2>
+<ul>
+    <li>Ensure your templates follow best practices for AWS CloudFormation.</li>
+    <li>Test your templates thoroughly before submitting.</li>
+    <li>Provide clear and detailed documentation.</li>
+</ul>
 
-## Customization
-To customize the templates, modify the template YAML files and adjust parameters as needed.
+<h2>License</h2>
+<p>This repository is licensed under the <a href="LICENSE">MIT License</a>. By contributing, you agree that your contributions will be licensed under the same license.</p>
 
-## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+<h2>Feedback & Support</h2>
+<p>If you encounter any issues or have suggestions, feel free to open an issue or submit a pull request. We appreciate your feedback and contributions!</p>
 
-## Contact Information
-For questions or support, please contact [Asaf Maoz](mailto:asaf@asafmaoz.com).
-
-## Additional Resources
-- [AWS CloudFormation Documentation](https://docs.aws.amazon.com/cloudformation)
-- [AWS CLI Documentation](https://aws.amazon.com/cli)
+<p>Happy templating! 🚀</p>

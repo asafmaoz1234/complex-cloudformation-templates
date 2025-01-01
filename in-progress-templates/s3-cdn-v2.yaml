@@ -9,10 +9,12 @@ Parameters:
   AppName:
     Description: This name be used as a prefix for resource names
     Type: String
+    Default: techhelpbot.com
 
   WebACL:
     Description: The web acl id of a CLOUDFRONT scoped web acl in us-east-1
     Type: String
+    Default: techhelpbot-web-acl
 
 Resources:
   CloudFrontLogsBucket:

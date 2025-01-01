@@ -1,0 +1,116 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "CloudFormation template for DomainName - website hosted on S3 with CloudFront, ACM, and Route 53
+All that is needed is to set the the parameters, and own the domain name. teamfitai-fe-resources"
+
+Parameters:
+  # Parameter for the S3 bucket name
+  S3BucketName:
+    Description: "The name of the S3 bucket to store the website content"
+    Type: String
+    Default: "seavisionpro-fe"  # Default name; can be customized
+
+  # Parameter for the domain name
+  DomainName:
+    Description: "The custom domain name for the website"
+    Type: String
+    Default: "seavisionpro.com"
+
+Resources:
+  # S3 Bucket for hosting the static website
+  S3Bucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: !Ref S3BucketName
+      WebsiteConfiguration:
+        IndexDocument: "index.html"
+        ErrorDocument: "404.html"
+
+  # S3 Bucket Policy for public access
+  S3BucketPolicy:
+    Type: "AWS::S3::BucketPolicy"
+    Properties:
+      Bucket: !Ref S3Bucket
+      PolicyDocument:
+        Statement:
+          - Action: "s3:GetObject"
+            Effect: "Allow"
+            Resource: !Sub "arn:aws:s3:::${S3BucketName}/*"
+            Principal:
+              CanonicalUser: !GetAtt CloudFrontOriginAccessIdentity.S3CanonicalUserId
+
+  # CloudFront Origin Access Identity
+  CloudFrontOriginAccessIdentity:
+      Type: "AWS::CloudFront::CloudFrontOriginAccessIdentity"
+      Properties:
+          CloudFrontOriginAccessIdentityConfig:
+            Comment: "Access identity for S3 bucket"
+
+#  # ACM Certificate with DNS validation
+#  Certificate:
+#    Type: "AWS::CertificateManager::Certificate"
+#    Properties:
+#      DomainName: !Ref DomainName
+#      ValidationMethod: "DNS"
+#      DomainValidationOptions:
+#        - DomainName: !Ref DomainName
+#          HostedZoneId: !Ref Route53HostedZone
+
+  # CloudFront Distribution
+  CloudFrontDistribution:
+    Type: "AWS::CloudFront::Distribution"
+    Properties:
+      DistributionConfig:
+        Comment: CDN for S3-backed website
+        Enabled: true
+        Origins:
+          - Id: "S3Origin"
+            DomainName: !GetAtt S3Bucket.DomainName
+            S3OriginConfig:
+              OriginAccessIdentity: !Sub "origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}"
+        DefaultCacheBehavior:
+          TargetOriginId: "S3Origin"
+          ViewerProtocolPolicy: "redirect-to-https"
+          AllowedMethods:
+            - GET
+          CachedMethods:
+            - GET
+            - HEAD
+          Compress: true
+          ForwardedValues:
+            QueryString: true
+            Cookies:
+              Forward: "none"
+        ViewerCertificate:
+          AcmCertificateArn: "arn:aws:acm:us-east-1:353009194243:certificate/2fe03ea0-c5cd-4b3d-9b45-104a06730223"
+          SslSupportMethod: "sni-only"
+        DefaultRootObject: "index.html"
+        PriceClass: "PriceClass_100" # Adjust based on the expected traffic
+
+#  # Route53 Hosted Zone for DomainName
+#  Route53HostedZone:
+#    Type: "AWS::Route53::HostedZone"
+#    Properties:
+#      Name: !Ref DomainName
+#
+#  # Route53 A Record pointing to CloudFront distribution
+#  Route53ARecord:
+#    Type: "AWS::Route53::RecordSet"
+#    Properties:
+#      HostedZoneId: !Ref Route53HostedZone
+#      Name: !Ref DomainName
+#      Type: "A"
+#      AliasTarget:
+#        DNSName: !GetAtt CloudFrontDistribution.DomainName
+#        HostedZoneId: "Z2FDTNDATAQYW2"  # CloudFront Hosted Zone ID for A record
+#      TTL: "300"
+
+Outputs:
+  WebsiteURL:
+    Description: "URL of the website hosted on CloudFront"
+    Value: !Sub "https://${DomainName}"
+  S3BucketName:
+    Description: "Name of the S3 bucket hosting the website"
+    Value: !Ref S3Bucket
+  CloudFrontDistributionID:
+    Description: "ID of the CloudFront distribution"
+    Value: !Ref CloudFrontDistribution
