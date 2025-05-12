@@ -3,11 +3,9 @@
 This CloudFormation template creates a static website hosted on Amazon S3 and served via Amazon CloudFront.<br> 
 It creates an S3 bucket to store the website content, a CloudFront distribution to serve the content with caching and SSL support,
 and uses a CloudFront Origin Access Identity (OAI) to restrict access to the S3 bucket.<br>
-A Route 53 A record set to associate the custom domain name with the CloudFront distribution.<br>
 ## Resources Created
 - S3 Bucket: Stores the static website content.
 - CloudFront Distribution: Serves the website content with caching and SSL support.
-- Route 53 Record Set: Associates the custom domain name with the CloudFront distribution.
 - CloudFront Origin Access Identity (OAI): Restricts access to the S3 bucket to only CloudFront.
 ## Parameters
 - HostedZone: The Route 53 hosted zone name, used also as the bucket name prefix.
